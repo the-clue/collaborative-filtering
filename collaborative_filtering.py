@@ -9,9 +9,11 @@ class Collaborative_Filtering:
         self.ratings_dataset = ratings_dataset
         self.user_item_matrix = ratings_dataset.pivot(index='userId', columns='movieId', values='rating')
         self.user_mean_ratings = self.user_item_matrix.mean(axis=1) # Valutazione media di ciascun utente
+
         # Per l'Item-based Nearest-Neighbor Collaborative Filtering, utilizzo direttamente una matrice normalizzata (o deviata?)
         # In realtà è utilizzabile anche per la User-based Nearest-Neighbor Collaborative Filtering (ma non l'ho usata)
         # Sottraggo la valutazione media di ciascun utente dalle loro valutazioni per evitare di farla dopo ogni passaggio
+
         self.normalized_user_item_matrix = self.user_item_matrix.subtract(self.user_mean_ratings, axis=0)
 
         self.user_similarity_matrix = self.generate_user_similarity_matrix()
@@ -33,7 +35,7 @@ class Collaborative_Filtering:
         co_rated_items = user1_ratings.intersection(user2_ratings)
 
         if len(co_rated_items) == 0: # forse è meglio < 3? Così non considero user con troppi pochi item in comune
-            return 0  # Nessun item in comune, correlazione nulla
+            return -1 # Nessun item in comune, correlazione nulla
 
         user1_co_ratings = self.user_item_matrix.loc[user1_id, co_rated_items] # Ratings dell'utente 1 per gli item co-rated
         user2_co_ratings = self.user_item_matrix.loc[user2_id, co_rated_items] # Ratings dell'utente 2 per gli item co-rated
@@ -217,7 +219,7 @@ class Collaborative_Filtering:
             item_similarity_matrix = pd.read_pickle(item_similarity_matrix_file_name)
         except:
             print("Item-Similarity Matrix Predefined does not exist. Generating Item-Similarity Matrix Predefined...")
-            cleaned_normalized_user_item_matrix = self.normalized_user_item_matrix#.fillna(0) # pulizia necessario in quanto deve essere privo di valori nulli
+            cleaned_normalized_user_item_matrix = self.normalized_user_item_matrix.fillna(0) # pulizia necessario in quanto deve essere privo di valori nulli
             cleaned_normalized_user_item_matrix_T = cleaned_normalized_user_item_matrix.T # traspongo per ottenere una matrice item-user, necessario per cosine_similarity
             item_similarity_matrix = pd.DataFrame(cosine_similarity(cleaned_normalized_user_item_matrix_T), index=self.normalized_user_item_matrix.columns, columns=self.normalized_user_item_matrix.columns)
             item_similarity_matrix.to_pickle(item_similarity_matrix_file_name)
@@ -320,4 +322,5 @@ def main():
                 print("Invalid mode inserted. Try again.")
         print()
 
-main()
+if __name__ == "__main__":
+    main()
