@@ -19,7 +19,7 @@ class Collaborative_Filtering:
         self.user_similarity_matrix = self.generate_user_similarity_matrix()
         self.user_similarity_matrix_predefined = self.generate_user_similarity_matrix_predefined()
 
-        # self.item_similarity_matrix = self.generate_item_similarity_matrix()
+        self.item_similarity_matrix = self.generate_item_similarity_matrix()
         self.item_similarity_matrix_predefined = self.generate_item_similarity_matrix_predefined()
         print("Initialization complete.")
 
@@ -192,7 +192,28 @@ class Collaborative_Filtering:
 
         return similarity
     
-    # Crea una Item-Similarity Matrix utilizzando la funzione adjusted_cosine_similarity
+    # Versione che utilizza funzioni di numpy per evitare cicli for
+    def adjusted_cosine_similarity_optimized(self, item1_id, item2_id):
+        item1_ratings = self.normalized_user_item_matrix[item1_id].dropna()
+        item2_ratings = self.normalized_user_item_matrix[item2_id].dropna()
+
+        co_rating_users = item1_ratings.index.intersection(item2_ratings.index)
+
+        if len(co_rating_users) == 0:
+            return 0
+        
+        item1_ratings = item1_ratings.loc[co_rating_users]
+        item2_ratings = item2_ratings.loc[co_rating_users]
+
+        numerator = np.dot(item1_ratings, item2_ratings)
+        denominator = np.sqrt(np.dot(item1_ratings, item1_ratings)) * np.sqrt(np.dot(item2_ratings, item2_ratings))
+
+        if denominator == 0:
+            return 0
+
+        return numerator / denominator
+
+    # Crea una Item-Similarity Matrix utilizzando la funzione adjusted_cosine_similarity_optimized
     def generate_item_similarity_matrix(self):
         print("Loading Item-Similarity Matrix...")
         item_similarity_matrix_file_name = 'item_similarity_matrix.pkl'
@@ -200,13 +221,18 @@ class Collaborative_Filtering:
             item_similarity_matrix = pd.read_pickle(item_similarity_matrix_file_name)
         except:
             print("Item-Similarity Matrix does not exist. Generating Item-Similarity Matrix...")
-            item_similarity_matrix = pd.DataFrame(index=self.normalized_user_item_matrix.columns, columns=self.normalized_user_item_matrix.columns)
+            columns = self.normalized_user_item_matrix.columns
+            item_similarity_matrix = pd.DataFrame(index=columns, columns=columns)
+            i = 0
+            end = len(self.normalized_user_item_matrix.columns)
             for item1_id in self.normalized_user_item_matrix.columns:
                 for item2_id in self.normalized_user_item_matrix.columns:
                     if item1_id != item2_id:
-                        item_similarity_matrix.loc[item1_id, item2_id] = self.adjusted_cosine_similarity(item1_id, item2_id)
+                        item_similarity_matrix.loc[item1_id, item2_id] = self.adjusted_cosine_similarity_optimized(item1_id, item2_id)
                     else:
-                        item_similarity_matrix.loc[item1_id, item2_id] = 0
+                        item_similarity_matrix.loc[item1_id, item2_id] = 1
+                i += 1
+                print(i, '/', end)
             item_similarity_matrix.to_pickle(item_similarity_matrix_file_name)
             item_similarity_matrix.to_csv(item_similarity_matrix_file_name[:-3] + 'csv')
         return item_similarity_matrix
@@ -219,7 +245,7 @@ class Collaborative_Filtering:
             item_similarity_matrix = pd.read_pickle(item_similarity_matrix_file_name)
         except:
             print("Item-Similarity Matrix Predefined does not exist. Generating Item-Similarity Matrix Predefined...")
-            cleaned_normalized_user_item_matrix = self.normalized_user_item_matrix.fillna(0) # pulizia necessario in quanto deve essere privo di valori nulli
+            cleaned_normalized_user_item_matrix = self.normalized_user_item_matrix.fillna(0) # pulizia necessaria in quanto deve essere privo di valori nulli
             cleaned_normalized_user_item_matrix_T = cleaned_normalized_user_item_matrix.T # traspongo per ottenere una matrice item-user, necessario per cosine_similarity
             item_similarity_matrix = pd.DataFrame(cosine_similarity(cleaned_normalized_user_item_matrix_T), index=self.normalized_user_item_matrix.columns, columns=self.normalized_user_item_matrix.columns)
             item_similarity_matrix.to_pickle(item_similarity_matrix_file_name)
@@ -232,8 +258,8 @@ class Collaborative_Filtering:
             return -1
 
         items_user_rated = self.user_item_matrix.loc[user_id].dropna().index # Considero solo gli item valutati dall'utente
-        similarities = self.item_similarity_matrix_predefined[item_id].loc[items_user_rated] # Considero le similarità tra l'item e gli item valutati dall'utente
-        nearest_neighbors = similarities.sort_values(ascending=False).head(k) # Considero i 50 neighbor più simili all'item, anche se è poco probabile che sia > 50
+        neighbors = self.item_similarity_matrix_predefined[item_id].loc[items_user_rated] # Considero le similarità tra l'item e gli item valutati dall'utente
+        nearest_neighbors = neighbors.sort_values(ascending=False).head(k) # Considero i 50 neighbor più simili all'item, anche se è poco probabile che sia > 50
 
         weighted_sum = 0 # Per la sommatoria pesata delle similarità (numeratore)
         similarity_sum = 0 # Per la sommatoria delle similarità (denominatore)
