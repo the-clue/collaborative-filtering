@@ -13,14 +13,14 @@ adjusted_rating_matrix = rating_matrix.subtract(user_mean_ratings, axis=0)
 
 # Crea una Item-Similarity Matrix attraverso una funzione scritta in C
 def generate_item_similarity_matrix():
-    item_similarity_matrix_file_name = 'item_similarity_matrix'
+    item_similarity_matrix_file_name = 'item_similarity_matrix_penalized'
     try:
         item_similarity_matrix = pd.read_pickle(item_similarity_matrix_file_name + '.pkl')
     except:
         print("Item-Similarity Matrix does not exist. Generating Item-Similarity Matrix...")
 
         # caricamento del dll
-        c_code = CDLL('./script.dll')
+        c_code = CDLL('./script_penalized.dll')
 
         # assegnazione dei tipi alla funzione del dll
         c_code.function.argtypes = [POINTER(c_float), POINTER(c_float), c_int, c_int]
@@ -38,8 +38,10 @@ def generate_item_similarity_matrix():
         array = adjusted_rating_matrix.to_numpy(dtype=np.float32).flatten()
         array_arg = array.ctypes.data_as(POINTER(c_float))
 
+        penalty_constant = 5
+
         # popolazione della matrice di similarità appiattita
-        c_code.function(array_arg, res_array_arg, n_cols, len(array))
+        c_code.function(array_arg, res_array_arg, n_cols, len(array), penalty_constant)
 
         item_similarity_matrix.loc[:, :] = res_array.reshape((n_cols, n_cols))
 
@@ -138,16 +140,15 @@ def prediction_item_based_with_time_decay(user_id, item_id, k=50, alpha=0.01):
 
     return predicted_rating
 
+item_similarity_matrix = generate_item_similarity_matrix()
+
 def show_histogram():
     # Istogramma utilizzando Matplotlib
     plt.hist(item_similarity_matrix[2], bins=100, edgecolor='k')
-    plt.xlabel('Rating')
+    plt.xlabel('Similarity')
     plt.ylabel('Frequency')
-    plt.title('Distribution of Ratings')
+    plt.title('Distribution of Similarities')
     plt.show()
-
-
-item_similarity_matrix = generate_item_similarity_matrix()
 
 val1 = adjusted_cosine_similarity(1, 2)
 val2 = adjusted_cosine_similarity(1, 3)
@@ -170,3 +171,5 @@ print("predizione utente 1 item 2 con decadimento temporale pesante:", predictio
 print("predizione utente 1 item 170875:", prediction_item_based(500, 170875))
 print("predizione utente 1 item 170875 con decadimento temporale leggero:", prediction_item_based_with_time_decay(500, 170875))
 print("predizione utente 1 item 170875 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 170875, alpha=0.0899))
+
+show_histogram()
