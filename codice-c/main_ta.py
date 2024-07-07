@@ -4,6 +4,7 @@ from ctypes import CDLL, POINTER, c_float, c_int
 import matplotlib.pyplot as plt
 
 ratings_dataset = pd.read_csv('./../ml-latest-small/ratings.csv', usecols=["userId", "movieId", "rating", "timestamp"])
+items_dataset = pd.read_csv('./../ml-latest-small/movies.csv')
 
 rating_matrix = ratings_dataset.pivot(index='userId', columns='movieId', values='rating')
 timestamp_matrix = ratings_dataset.pivot(index='userId', columns='movieId', values='timestamp')
@@ -150,6 +151,24 @@ def show_histogram():
     plt.title('Distribution of Similarities')
     plt.show()
 
+def get_item_name_from_id(item_id):
+    return items_dataset.loc[items_dataset['movieId'] == item_id, 'title'].values[0]
+
+def get_recent_favorite_items_of_user(user_id):
+    user_ratings = ratings_dataset[ratings_dataset['userId'] == user_id]
+    max_rating = user_ratings['rating'].max()
+    favorite_items = user_ratings[user_ratings['rating'] == max_rating]
+    favorite_items = favorite_items.sort_values(by='timestamp', ascending=False)
+    k = 10  # number of items to display
+    return favorite_items.head(k)
+
+def print_recent_favorite_items_of_user(user_id):
+    favorite_item_ids = get_recent_favorite_items_of_user(user_id)['movieId']
+    favorite_item_names = []
+    for item_id in favorite_item_ids:
+        favorite_item_names.append(get_item_name_from_id(item_id))
+    return favorite_item_names
+
 val1 = adjusted_cosine_similarity(1, 2)
 val2 = adjusted_cosine_similarity(1, 3)
 val3 = adjusted_cosine_similarity(1, 4)
@@ -164,12 +183,16 @@ val4 = item_similarity_matrix.loc[1, 5]
 
 print(val1, val2, val3, val4)
 
-print("predizione utente 1 item 2:", prediction_item_based(500, 2))
+print("user 1 favorite items: ", print_recent_favorite_items_of_user(1))
+
+print("predizione utente 1 item 2:", prediction_item_based(1, 2))
 print("predizione utente 1 item 2 con decadimento temporale leggero:", prediction_item_based_with_time_decay(500, 2))
 print("predizione utente 1 item 2 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 2, alpha=0.0899))
+print("item 2: ", get_item_name_from_id(2))
 
-print("predizione utente 1 item 170875:", prediction_item_based(500, 170875))
+print("predizione utente 1 item 170875:", prediction_item_based(1, 170875))
 print("predizione utente 1 item 170875 con decadimento temporale leggero:", prediction_item_based_with_time_decay(500, 170875))
 print("predizione utente 1 item 170875 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 170875, alpha=0.0899))
+print("item 170875:", get_item_name_from_id(170875))
 
 show_histogram()
