@@ -187,12 +187,12 @@ print("user 1 favorite items: ", print_recent_favorite_items_of_user(1))
 
 print("predizione utente 1 item 2:", prediction_item_based(1, 2))
 print("predizione utente 1 item 2 con decadimento temporale leggero:", prediction_item_based_with_time_decay(500, 2))
-print("predizione utente 1 item 2 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 2, alpha=0.0899))
+print("predizione utente 1 item 2 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 2, alpha=0.0898))
 print("item 2: ", get_item_name_from_id(2))
 
 print("predizione utente 1 item 170875:", prediction_item_based(1, 170875))
 print("predizione utente 1 item 170875 con decadimento temporale leggero:", prediction_item_based_with_time_decay(500, 170875))
-print("predizione utente 1 item 170875 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 170875, alpha=0.0899))
+print("predizione utente 1 item 170875 con decadimento temporale pesante:", prediction_item_based_with_time_decay(500, 170875, alpha=0.0898))
 print("item 170875:", get_item_name_from_id(170875))
 
 show_histogram()
