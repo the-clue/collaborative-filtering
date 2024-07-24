@@ -81,6 +81,9 @@ class Collaborative_Filtering:
 
     # Funzione per predire il rating di un item (film) dato un utente considerando i k item vicini (50 per default)
     def prediction_item_based(self, user_id, item_id, k=50, isPenalized=False, timeAwareAlpha=0.0):
+        if item_id not in self.rating_matrix.columns:  # se l'id non esiste, allora ritorna 0
+            return 0
+
         if not pd.isna(self.rating_matrix.loc[user_id, item_id]): # Allora la predizione non è necessaria
             return self.rating_matrix.loc[user_id, item_id]
 
@@ -90,7 +93,11 @@ class Collaborative_Filtering:
             similarities = self.item_similarity_matrix_penalized[item_id].loc[items_user_rated]
         else:
             similarities = self.item_similarity_matrix[item_id].loc[items_user_rated]
-        nearest_neighbors = similarities.sort_values(ascending=False).head(k) # Considero i 50 neighbor più simili all'item, anche se è poco probabile che sia > 50
+        nearest_neighbors = similarities.sort_values(ascending=False)
+        k = min(k, len(nearest_neighbors))
+        if k == 0: # Caso in cui non ci sono vicini
+            return 0
+        nearest_neighbors = nearest_neighbors.head(k)
 
         weighted_sum = 0 # Per la sommatoria pesata delle similarità (numeratore)
         similarity_sum = 0 # Per la sommatoria delle similarità (denominatore)
