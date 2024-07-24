@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from collaborative_filtering import Collaborative_Filtering
 
 # considero come rilevanti i film per cui l'utente darebbe un rating >= di 3.5
-def evaluate(collaborative_filterer, ratings_test_set, k=50, isPenalized=False, timeAwareAlpha=0.0, threshold=3.5):
+def evaluate(collaborative_filterer, ratings_test_set, k=50, isPenalized=False, timeAwareAlpha=0.0, threshold=3):
     true_positives = 0
     false_positives = 0
     false_negatives = 0
@@ -29,6 +29,9 @@ def evaluate(collaborative_filterer, ratings_test_set, k=50, isPenalized=False, 
 
     return precision, recall
 
+def f_measure(p, r):
+    return 2 * (p * r) / (p + r)
+
 def main():
     ratings_dataset = pd.read_csv('datasets/ratings.csv', usecols=["userId", "movieId", "rating", "timestamp"])
     items_dataset = pd.read_csv('datasets/movies.csv', usecols=["movieId", "title", "genres"])
@@ -47,72 +50,84 @@ def main():
     print("=======BASE")
     print(f"Precision: {precision_base:.4f}")
     print(f"Recall: {recall_base:.4f}")
+    print(f"F-measure: {f_measure(precision_base, recall_base):.4f}")
     print()
 
     precision_base_penalized, recall_base_penalized = evaluate(collaborative_filterer, ratings_test_set, isPenalized=True)
     print("=======BASE - Penalized:")
     print(f"Precision: {precision_base_penalized:.4f}")
     print(f"Recall: {recall_base_penalized:.4f}")
+    print(f"F-measure: {f_measure(precision_base_penalized, recall_base_penalized):.4f}")
     print()
 
     precision_time_aware, recall_time_aware = evaluate(collaborative_filterer, ratings_test_set, timeAwareAlpha=timeAwareAlpha_strong)
     print("=======TIME-AWARE-STRONG:")
     print(f"Precision: {precision_time_aware:.4f}")
     print(f"Recall: {recall_time_aware:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware, recall_time_aware):.4f}")
     print()
 
     precision_time_aware_penalized, recall_time_aware_penalized = evaluate(collaborative_filterer, ratings_test_set, isPenalized=True, timeAwareAlpha=timeAwareAlpha_strong)
     print("=======TIME-AWARE-STRONG - Penalized:")
     print(f"Precision: {precision_time_aware_penalized:.4f}")
     print(f"Recall: {recall_time_aware_penalized:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware_penalized, recall_time_aware_penalized):.4f}")
     print()
 
     precision_time_aware, recall_time_aware = evaluate(collaborative_filterer, ratings_test_set, timeAwareAlpha=timeAwareAlpha_medium)
     print("=======TIME-AWARE-MEDIUM:")
     print(f"Precision: {precision_time_aware:.4f}")
     print(f"Recall: {recall_time_aware:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware, recall_time_aware):.4f}")
     print()
 
     precision_time_aware_penalized, recall_time_aware_penalized = evaluate(collaborative_filterer, ratings_test_set, isPenalized=True, timeAwareAlpha=timeAwareAlpha_medium)
     print("=======TIME-AWARE-MEDIUM - Penalized:")
     print(f"Precision: {precision_time_aware_penalized:.4f}")
     print(f"Recall: {recall_time_aware_penalized:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware_penalized, recall_time_aware_penalized):.4f}")
     print()
 
     precision_time_aware, recall_time_aware = evaluate(collaborative_filterer, ratings_test_set, timeAwareAlpha=timeAwareAlpha_weak)
     print("=======TIME-AWARE-WEAK:")
     print(f"Precision: {precision_time_aware:.4f}")
     print(f"Recall: {recall_time_aware:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware, recall_time_aware):.4f}")
     print()
 
     precision_time_aware_penalized, recall_time_aware_penalized = evaluate(collaborative_filterer, ratings_test_set, isPenalized=True, timeAwareAlpha=timeAwareAlpha_weak)
     print("=======TIME-AWARE-WEAK - Penalized:")
     print(f"Precision: {precision_time_aware_penalized:.4f}")
     print(f"Recall: {recall_time_aware_penalized:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware_penalized, recall_time_aware_penalized):.4f}")
     print()
 
     precision_time_aware, recall_time_aware = evaluate(collaborative_filterer, ratings_test_set, timeAwareAlpha=timeAwareAlpha_very_weak)
     print("=======TIME-AWARE-VERY-WEAK:")
     print(f"Precision: {precision_time_aware:.4f}")
     print(f"Recall: {recall_time_aware:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware, recall_time_aware):.4f}")
     print()
 
     precision_time_aware_penalized, recall_time_aware_penalized = evaluate(collaborative_filterer, ratings_test_set, isPenalized=True, timeAwareAlpha=timeAwareAlpha_very_weak)
     print("=======TIME-AWARE-VERY-WEAK - Penalized:")
     print(f"Precision: {precision_time_aware_penalized:.4f}")
     print(f"Recall: {recall_time_aware_penalized:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware_penalized, recall_time_aware_penalized):.4f}")
     print()
 
     precision_time_aware, recall_time_aware = evaluate(collaborative_filterer, ratings_test_set, timeAwareAlpha=timeAwareAlpha_minimum)
     print("=======TIME-AWARE-MINIMUM:")
     print(f"Precision: {precision_time_aware:.4f}")
     print(f"Recall: {recall_time_aware:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware, recall_time_aware):.4f}")
     print()
 
     precision_time_aware_penalized, recall_time_aware_penalized = evaluate(collaborative_filterer, ratings_test_set, isPenalized=True, timeAwareAlpha=timeAwareAlpha_minimum)
     print("=======TIME-AWARE-MINIMUM - Penalized:")
     print(f"Precision: {precision_time_aware_penalized:.4f}")
     print(f"Recall: {recall_time_aware_penalized:.4f}")
+    print(f"F-measure: {f_measure(precision_time_aware_penalized, recall_time_aware_penalized):.4f}")
     print()
 
 if __name__ == "__main__":
