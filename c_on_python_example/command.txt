@@ -1,1 +1,0 @@
-gcc -m64 -shared -o script.dll script.c

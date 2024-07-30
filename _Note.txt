@@ -1,3 +1,0 @@
-Utilizzando una funzione predefinita di Pearson Correlation per calcolare le similarità tra gli utenti,
-se sostituisco i valori nulli con zero, ho come similarità massima un valore poco più di 0.4
-se lascio i valori nulli, ho alcune similarità vuote
