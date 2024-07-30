@@ -3,7 +3,7 @@ from collaborative_filtering import *
 def main():
     collaborative_filterer = Collaborative_Filtering(ratings_dataset=pd.read_csv('datasets/ratings.csv', usecols=["userId", "movieId", "rating", "timestamp"]))
 
-    timeAwareAlpha = 0.085 # sopra 0.085 il risultato è quasi sempre 0
+    timeAwareAlpha = 0.084
     items_dataset = pd.read_csv('datasets/movies.csv', usecols=["movieId", "title", "genres"])
 
     def get_item_name_from_id(item_id):

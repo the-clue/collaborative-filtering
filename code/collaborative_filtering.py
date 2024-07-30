@@ -124,7 +124,6 @@ class Collaborative_Filtering:
         for item_id in self.adjusted_rating_matrix.columns:
             if pd.isna(self.adjusted_rating_matrix.loc[user_id, item_id]): # Per considerare solo item non ancora valutati dall'utente
                 recommendations[item_id] = self.prediction_item_based(user_id, item_id, isPenalized=isPenalized, timeAwareAlpha=timeAwareAlpha)
-                #print(recommendations)
 
         sorted_recommendations = recommendations.sort_values(ascending=False)
         top_k_recommendations = sorted_recommendations.head(recommendations_size)
