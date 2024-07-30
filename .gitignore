@@ -4,3 +4,5 @@ item_similarity_matrix_penalized.pkl
 item_similarity_matrix.csv
 item_similarity_matrix.pkl
 /unused
+
+*.pyc
