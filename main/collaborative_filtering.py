@@ -94,6 +94,9 @@ class Collaborative_Filtering:
         else:
             similarities = self.item_similarity_matrix[item_id].loc[items_user_rated]
         nearest_neighbors = similarities.sort_values(ascending=False)
+        
+        nearest_neighbors = nearest_neighbors[nearest_neighbors > 0]
+
         k = min(k, len(nearest_neighbors))
         if k == 0: # Caso in cui non ci sono vicini
             return 0
